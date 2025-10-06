@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Image as ImageIcon, Video, Wand2, Settings, Download, Share2, RefreshCw, Plus, ChevronDown, Play, Pause, Eye, Heart, MessageCircle, Send, Check, X, ArrowRight, ArrowLeft, Upload, Palette, Type, LayoutGrid as Layout, Zap, Brain, Cpu, Database, CheckCircle, Clock, AlertCircle, CreditCard as Edit3, Copy, Trash2, MoreHorizontal, Instagram, Facebook, Twitter, Youtube, Linkedin, Globe, Smartphone, Monitor, Tablet, Star, Layers, Filter, Maximize2, Minimize2, BarChart3 as BarChart3Icon, Target, AlertTriangle, FileType } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Chatbot } from './Chatbot';
 import video_file from "./video.mp4"
 import img_1 from "./1.jpg"
 interface GeneratedAsset {
@@ -1814,8 +1813,6 @@ const [approvalFlag,setApprovalFlag] = useState<boolean>()
         </div>
       )}
 
-      {/* Chatbot */}
-      <Chatbot currentPage="Creator Studio" />
     </div>
           <style jsx>{`
         @keyframes fade-in {

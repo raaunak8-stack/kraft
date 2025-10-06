@@ -17,6 +17,7 @@ import { PerformanceAgentView } from './components/PerformanceAgentView';
 import { MarketingStudio } from './components/MarketingStudio';
 import Marketing from './components/MarketingStucio1';
 import { MarketingStudio3 } from './components/MarketingStudio3';
+import { Chatbot } from './components/Chatbot';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -76,6 +77,7 @@ function App() {
           <main className="flex-1 overflow-auto w-full">
             <div className="w-full">{renderContent()}</div>
           </main>
+          <Chatbot activeTab={activeTab} />
         </div>
       )}
     </ThemeProvider>
