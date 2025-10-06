@@ -22,7 +22,11 @@ import {
   Sparkles,
   Zap,
   TrendingDown,
+  Linkedin,
+  Facebook,
+  Instagram,
 } from "lucide-react";
+import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface Creative {
   id: string;
@@ -73,6 +77,33 @@ interface CampaignDetailViewProps {
   onTabChange: (tab: "overview" | "creatives" | "performance" | "timeline" | "schedule") => void;
   getStatusColor: (status: string) => string;
 }
+
+  // Performance chart data
+  const performanceData = [
+    { date: 'Jan 15', impressions: 180000, clicks: 3600, conversions: 240 },
+    { date: 'Jan 22', impressions: 220000, clicks: 4400, conversions: 290 },
+    { date: 'Jan 29', impressions: 280000, clicks: 5600, conversions: 380 },
+    { date: 'Feb 5', impressions: 320000, clicks: 6400, conversions: 420 },
+    { date: 'Feb 12', impressions: 380000, clicks: 7600, conversions: 510 },
+    { date: 'Feb 19', impressions: 420000, clicks: 8400, conversions: 580 },
+    { date: 'Feb 26', impressions: 480000, clicks: 9600, conversions: 650 },
+    { date: 'Mar 5', impressions: 540000, clicks: 10800, conversions: 720 }
+  ];
+
+  const channelPerformance = [
+    { name: 'Instagram', value: 45, color: '#E1306C' },
+    { name: 'Facebook', value: 30, color: '#1877F2' },
+    { name: 'LinkedIn', value: 25, color: '#0A66C2' }
+  ];
+
+  const conversionFunnel = [
+    { stage: 'Impressions', count: 2400000, percentage: 100 },
+    { stage: 'Clicks', count: 48000, percentage: 2.0 },
+    { stage: 'Leads', count: 9600, percentage: 0.4 },
+    { stage: 'Conversions', count: 3240, percentage: 0.135 }
+  ];
+
+
 
 export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
   campaign,
@@ -129,7 +160,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
           >
             Performance
           </button>
-          <button
+          {/* <button
             onClick={() => onTabChange("timeline")}
             className={`px-4 py-2 font-medium text-sm transition-all border-b-2 ${
               activeTab === "timeline"
@@ -138,7 +169,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
             }`}
           >
             Timeline
-          </button>
+          </button> */}
           <button
             onClick={() => onTabChange("schedule")}
             className={`px-4 py-2 font-medium text-sm transition-all border-b-2 ${
@@ -447,8 +478,287 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
                 </div>
               </div>
             )}
+             {campaign.status !== "approved" && (
+              <div className="space-y-6">
+                {/* Performance Over Time */}
+                <div>
+                  <h4 className="text-lg font-semibold text-slate-800 mb-4">Campaign Performance Trends</h4>
+                  <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={performanceData}>
+                        <defs>
+                          <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorConversions" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="date" stroke="#64748b" style={{ fontSize: '12px' }} />
+                        <YAxis stroke="#64748b" style={{ fontSize: '12px' }} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }} 
+                        />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
+                        <Area type="monotone" dataKey="impressions" stroke="#3b82f6" fillOpacity={1} fill="url(#colorImpressions)" />
+                        <Area type="monotone" dataKey="clicks" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorClicks)" />
+                        <Area type="monotone" dataKey="conversions" stroke="#10b981" fillOpacity={1} fill="url(#colorConversions)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Channel Distribution */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-800 mb-4">Channel Performance Distribution</h4>
+                    <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={channelPerformance}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, value }) => `${name}: ${value}%`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {channelPerformance.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-800 mb-4">Conversion Funnel</h4>
+                    <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={conversionFunnel} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                          <XAxis type="number" stroke="#64748b" style={{ fontSize: '12px' }} />
+                          <YAxis dataKey="stage" type="category" stroke="#64748b" style={{ fontSize: '12px' }} />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'white', 
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '8px',
+                              fontSize: '12px'
+                            }} 
+                          />
+                          <Bar dataKey="count" fill="#3b82f6" radius={[0, 8, 8, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Platform Breakdown */}
+                <div>
+                  <h4 className="text-lg font-semibold text-slate-800 mb-4">Platform-Specific Metrics</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Instagram className="h-5 w-5 text-pink-600 mr-2" />
+                          <span className="font-semibold text-slate-800">Instagram</span>
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">Best CTR</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Impressions:</span>
+                          <span className="font-semibold text-slate-800">1.08M</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Clicks:</span>
+                          <span className="font-semibold text-slate-800">27.2K</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">CTR:</span>
+                          <span className="font-semibold text-green-600">2.52%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Facebook className="h-5 w-5 text-blue-600 mr-2" />
+                          <span className="font-semibold text-slate-800">Facebook</span>
+                        </div>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">Balanced</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Impressions:</span>
+                          <span className="font-semibold text-slate-800">720K</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Clicks:</span>
+                          <span className="font-semibold text-slate-800">14.4K</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">CTR:</span>
+                          <span className="font-semibold text-blue-600">2.0%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Linkedin className="h-5 w-5 text-blue-700 mr-2" />
+                          <span className="font-semibold text-slate-800">LinkedIn</span>
+                        </div>
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">Premium</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Impressions:</span>
+                          <span className="font-semibold text-slate-800">600K</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">Clicks:</span>
+                          <span className="font-semibold text-slate-800">15K</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600">CTR:</span>
+                          <span className="font-semibold text-purple-600">2.5%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+             <div className="space-y-4">
+                <h4 className={`text-lg font-semibold ${themeClasses.text} flex items-center mb-4`}>
+                  <Sparkles className="mr-2 text-purple-500" size={20} />
+                  AI Insights & Optimization
+                </h4>
+                <div className="grid gap-4 grid-cols-3">
+                <div className="p-5 rounded-xl border-2 border-red-200 bg-red-50">
+                  <div className="flex items-start mb-3">
+                    <div className="p-2 bg-red-100 rounded-lg mr-3">
+                      <Zap className="text-red-600" size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-semibold text-red-900 mb-1">Budget Reallocation</h5>
+                      <p className="text-sm text-red-800">
+                        Facebook ads showing 15% higher CTR. Consider reallocating budget by 20% from LinkedIn.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="w-full py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                    Apply Now
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-xl border-2 border-yellow-200 bg-yellow-50">
+                  <div className="flex items-start mb-3">
+                    <div className="p-2 bg-yellow-100 rounded-lg mr-3">
+                      <AlertCircle className="text-yellow-600" size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-semibold text-yellow-900 mb-1">Creative Fatigue</h5>
+                      <p className="text-sm text-yellow-800">
+                        Ad creative performance dropped 8% over last 2 days. Consider refreshing assets.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="w-full py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors">
+                    Review
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-xl border-2 border-green-200 bg-green-50">
+                  <div className="flex items-start mb-3">
+                    <div className="p-2 bg-green-100 rounded-lg mr-3">
+                      <TrendingUp className="text-green-600" size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-semibold text-green-900 mb-1">Peak Performance Window</h5>
+                      <p className="text-sm text-green-800">
+                        Best engagement detected 6-9 PM. Schedule adjusted automatically for optimal reach.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                    View Details
+                  </button>
+                </div>
+
+               
+                </div>
+                 <div className={`p-5 rounded-xl border ${themeClasses.border} bg-gradient-to-br from-purple-50 to-blue-50`}>
+                  <h5 className="font-semibold text-purple-900 mb-3 flex items-center">
+                    <Sparkles className="mr-2 text-purple-600" size={18} />
+                    Optimization Score
+                  </h5>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="relative w-32 h-32">
+                      <svg className="transform -rotate-90 w-32 h-32">
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r="56"
+                          stroke="#e5e7eb"
+                          strokeWidth="8"
+                          fill="none"
+                        />
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r="56"
+                          stroke="url(#gradient)"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 56}`}
+                          strokeDashoffset={`${2 * Math.PI * 56 * (1 - 0.82)}`}
+                          strokeLinecap="round"
+                        />
+                        <defs>
+                          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="100%" stopColor="#3b82f6" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-3xl font-bold text-purple-900">82</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-center text-sm text-gray-700 mb-3">
+                    Your campaign is well optimized. Apply AI suggestions to reach 95+
+                  </p>
+                  <button className="w-full py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                    Get AI Recommendations
+                  </button>
+                </div>
+              </div>
           </div>
         )}
+
+          
 
         {activeTab === "timeline" && (
           <div className="space-y-4">
@@ -503,7 +813,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
 
         {activeTab === "schedule" && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className=" gap-6">
               <div className="space-y-4">
                 <h4 className={`text-lg font-semibold ${themeClasses.text} flex items-center mb-4`}>
                   <Calendar className="mr-2 text-blue-500" size={20} />
@@ -617,110 +927,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h4 className={`text-lg font-semibold ${themeClasses.text} flex items-center mb-4`}>
-                  <Sparkles className="mr-2 text-purple-500" size={20} />
-                  AI Insights & Optimization
-                </h4>
-
-                <div className="p-5 rounded-xl border-2 border-red-200 bg-red-50">
-                  <div className="flex items-start mb-3">
-                    <div className="p-2 bg-red-100 rounded-lg mr-3">
-                      <Zap className="text-red-600" size={18} />
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="font-semibold text-red-900 mb-1">Budget Reallocation</h5>
-                      <p className="text-sm text-red-800">
-                        Facebook ads showing 15% higher CTR. Consider reallocating budget by 20% from LinkedIn.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
-                    Apply Now
-                  </button>
-                </div>
-
-                <div className="p-5 rounded-xl border-2 border-yellow-200 bg-yellow-50">
-                  <div className="flex items-start mb-3">
-                    <div className="p-2 bg-yellow-100 rounded-lg mr-3">
-                      <AlertCircle className="text-yellow-600" size={18} />
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="font-semibold text-yellow-900 mb-1">Creative Fatigue</h5>
-                      <p className="text-sm text-yellow-800">
-                        Ad creative performance dropped 8% over last 2 days. Consider refreshing assets.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors">
-                    Review
-                  </button>
-                </div>
-
-                <div className="p-5 rounded-xl border-2 border-green-200 bg-green-50">
-                  <div className="flex items-start mb-3">
-                    <div className="p-2 bg-green-100 rounded-lg mr-3">
-                      <TrendingUp className="text-green-600" size={18} />
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="font-semibold text-green-900 mb-1">Peak Performance Window</h5>
-                      <p className="text-sm text-green-800">
-                        Best engagement detected 6-9 PM. Schedule adjusted automatically for optimal reach.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-                    View Details
-                  </button>
-                </div>
-
-                <div className={`p-5 rounded-xl border ${themeClasses.border} bg-gradient-to-br from-purple-50 to-blue-50`}>
-                  <h5 className="font-semibold text-purple-900 mb-3 flex items-center">
-                    <Sparkles className="mr-2 text-purple-600" size={18} />
-                    Optimization Score
-                  </h5>
-                  <div className="flex items-center justify-center mb-4">
-                    <div className="relative w-32 h-32">
-                      <svg className="transform -rotate-90 w-32 h-32">
-                        <circle
-                          cx="64"
-                          cy="64"
-                          r="56"
-                          stroke="#e5e7eb"
-                          strokeWidth="8"
-                          fill="none"
-                        />
-                        <circle
-                          cx="64"
-                          cy="64"
-                          r="56"
-                          stroke="url(#gradient)"
-                          strokeWidth="8"
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * 56}`}
-                          strokeDashoffset={`${2 * Math.PI * 56 * (1 - 0.82)}`}
-                          strokeLinecap="round"
-                        />
-                        <defs>
-                          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#3b82f6" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-3xl font-bold text-purple-900">82</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-center text-sm text-gray-700 mb-3">
-                    Your campaign is well optimized. Apply AI suggestions to reach 95+
-                  </p>
-                  <button className="w-full py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
-                    Get AI Recommendations
-                  </button>
-                </div>
-              </div>
+             
             </div>
           </div>
         )}

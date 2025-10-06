@@ -51,7 +51,7 @@ import { useTheme } from "../contexts/ThemeContext";
 export const PerformanceCockpit: React.FC = () => {
   const { getThemeClasses } = useTheme();
   const themeClasses = getThemeClasses();
-  const [activeSection, setActiveSection] = useState("campaigns");
+  const [activeSection, setActiveSection] = useState("agents");
   const [timeRange, setTimeRange] = useState("24h");
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const [customStartDate, setCustomStartDate] = useState("");
@@ -112,7 +112,7 @@ export const PerformanceCockpit: React.FC = () => {
   });
 
   const sections = [
-    { id: "campaigns", label: "Campaign Monitoring", icon: Target },
+    // { id: "campaigns", label: "Campaign Monitoring", icon: Target },
     { id: "agents", label: "Agent Performance", icon: Bot },
     { id: "memory", label: "Agent Memory", icon: Database },
     { id: "models", label: "ML Model KPIs", icon: Brain },

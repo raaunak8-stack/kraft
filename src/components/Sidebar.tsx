@@ -33,7 +33,7 @@ const mainMenuItems = [
   // { id: 'marketingstudio3', label: 'Marketing Studio 3', icon: Megaphone, color: 'text-teal-600' },
   { id: 'brandkit', label: 'Brand Kit', icon: PaletteIcon, color: 'text-indigo-600' },
   // { id: 'performanceagent', label: 'Agency Performance Monitor', icon: Activity, color: 'text-purple-600' },
-  { id: 'strategy1', label: 'Campaign Studio New', icon: Target, color: 'text-green-600' },
+  // { id: 'strategy1', label: 'Campaign Studio New', icon: Target, color: 'text-green-600' },
 ];
 
 const performanceGovernanceItems = [

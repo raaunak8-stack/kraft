@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Sparkles, Target, TrendingUp, Zap, Moon, Sun, Send, Bot, User, Lightbulb, Brain, Rocket, Wand2, ChevronDown, Palette, Settings, Calendar, Users as UsersIcon, FileText, Download, Share2, Copy, Star, BarChart3, Shield, Clock, CheckCircle, AlertTriangle, Mic, Globe, Bookmark, Filter, RefreshCw, Database, Activity, Award, Layers, Eye, MousePointer, DollarSign, GitBranch, AlertCircle, Save, Plus, Search, MessageSquare, Users, Facebook, Instagram, Twitter, Linkedin, Youtube, Mail, MoreHorizontal, Play, Pause, CreditCard as Edit3, Fence, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Target, TrendingUp, Zap, Moon, Sun, Send, Bot, User, Lightbulb, Brain, Rocket, Wand2, ChevronDown, Palette, Settings, Calendar, Users as UsersIcon, FileText, Download, Share2, Copy, Star, BarChart3, Shield, Clock, CheckCircle, AlertTriangle, Mic, Globe, Bookmark, Filter, RefreshCw, Database, Activity, Award, Layers, Eye, MousePointer, DollarSign, GitBranch, AlertCircle, Save, Plus, Search, MessageSquare, Users, Facebook, Instagram, Twitter, Linkedin, Youtube, Mail, MoreHorizontal, Play, Pause, CreditCard as Edit3, Fence, Check, Trash2, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface SearchQuery {
@@ -74,12 +74,17 @@ export const StrategyStudio: React.FC = ({onTabChange}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [customTemplates, setCustomTemplates] = useState<any[]>([]);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateIndustry, setTemplateIndustry] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
 
     const tabs = [
     { id: 'create', label: 'Create Campaign', icon: Plus },
     // { id: 'legacy', label: 'Legacy Campaigns', icon: Target },
-    { id: 'manage', label: 'Manage Campaigns', icon: Settings },
-    { id: 'analytics', label: 'Campaign Analytics', icon: BarChart3 },
+    // { id: 'manage', label: 'Manage Campaigns', icon: Settings },
+    // { id: 'analytics', label: 'Campaign Analytics', icon: BarChart3 },
     { id: 'templates', label: 'Templates', icon: FileText },
   ];
 
@@ -432,6 +437,58 @@ export const StrategyStudio: React.FC = ({onTabChange}) => {
     console.log('Navigating to Creator Studio with campaign data:', getCurrentResponse());
     // For now, we'll just show an alert
     alert('Campaign data will be transferred to Creator Studio for creative development!');
+  };
+
+  const handleSaveAsTemplate = () => {
+    setShowSaveTemplateModal(true);
+  };
+
+  const handleConfirmSaveTemplate = () => {
+    if (!templateName.trim()) {
+      alert('Please enter a template name');
+      return;
+    }
+
+    const currentCampaign = getCurrentResponse();
+    const newTemplate = {
+      id: `custom-${Date.now()}`,
+      name: templateName,
+      industry: templateIndustry || 'General',
+      description: templateDescription || 'Custom campaign template',
+      type: 'custom',
+      campaignData: currentCampaign,
+      query: searchHistory[currentIndex]?.query || '',
+      createdAt: new Date(),
+    };
+
+    setCustomTemplates([...customTemplates, newTemplate]);
+    setShowSaveTemplateModal(false);
+    setTemplateName('');
+    setTemplateIndustry('');
+    setTemplateDescription('');
+
+    // Show success message
+    alert(`Template "${templateName}" saved successfully!`);
+  };
+
+  const handleCancelSaveTemplate = () => {
+    setShowSaveTemplateModal(false);
+    setTemplateName('');
+    setTemplateIndustry('');
+    setTemplateDescription('');
+  };
+
+  const handleUseTemplate = (template: any) => {
+    if (template.query) {
+      setCampaignPrompt(template.query);
+      setActiveTab('create');
+    }
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    if (confirm('Are you sure you want to delete this template?')) {
+      setCustomTemplates(customTemplates.filter(t => t.id !== templateId));
+    }
   };
 
   const renderLegacyCampaigns = () => (
@@ -979,6 +1036,13 @@ const simulateThinkingTasks = () => {
                         <Fence  size={16} className="mr-2" />
                         Advance
                       </button>
+                      <button
+                        onClick={handleSaveAsTemplate}
+                        className={`flex items-center px-4 py-2 ${theme === 'neon' ? 'bg-gradient-to-r from-green-600 to-emerald-600' : 'bg-green-500'} text-white rounded-xl hover:opacity-90 transition-all`}
+                      >
+                        <Bookmark size={16} className="mr-2" />
+                        Save as Template
+                      </button>
                     </div>
                   </div>
 
@@ -1151,14 +1215,14 @@ const simulateThinkingTasks = () => {
                 <div className="text-center pt-6">
                   <button 
                     // onClick={handleGoToCreatorStudio}
-                    className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl ${
+                    className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                       theme === 'neon' 
                         ? 'bg-gradient-to-r from-blue-500 to-blue-500 text-white shadow-lg shadow-blue-500/50' 
                         : 'bg-gradient-to-r from-blue-500 to-blue-500  text-white hover:shadow-blue-500/50'
                     } flex items-center mx-auto`}
                   >
                     <Save className="mr-3" size={24} />
-                    Confirm
+                    Save
                   </button>
                   <p className={`${themeClasses.textSecondary} text-sm mt-3`}>
                     Go to Create Studio to generate campaign assets
@@ -1167,14 +1231,14 @@ const simulateThinkingTasks = () => {
                    <div className="text-center pt-6">
                   <button 
                     onClick={() => onTabChange("creator")}
-                    className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl ${
+                    className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${
                       theme === 'neon' 
                         ? 'bg-gradient-to-r from-blue-500 to-blue-500 text-white shadow-lg shadow-blue-500/50' 
                         : 'bg-gradient-to-r from-blue-500 to-blue-500  text-white hover:shadow-blue-500/50'
                     } flex items-center mx-auto`}
                   >
                     <Palette className="mr-3" size={24} />
-                    Create Studio
+                    Confirm & Next
                   </button>
                   <p className={`${themeClasses.textSecondary} text-sm mt-3`}>
                     Go to Create Studio to generate campaign assets
@@ -1560,8 +1624,49 @@ const simulateThinkingTasks = () => {
 
   const renderTemplates = () => (
     <div className="space-y-6">
+      {/* Custom Templates */}
+      {customTemplates.length > 0 && (
+        <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-2xl p-6`}>
+          <h3 className={`text-xl font-semibold ${themeClasses.text} mb-6 flex items-center`}>
+            <Bookmark className="mr-2 text-green-500" size={24} />
+            My Custom Templates
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {customTemplates.map((template) => (
+              <div key={template.id} className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-2xl p-6 ${themeClasses.hover} transition-all`}>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h4 className={`font-semibold ${themeClasses.text} mb-1`}>{template.name}</h4>
+                    <p className={`text-xs ${themeClasses.textSecondary} mb-2`}>{template.industry}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteTemplate(template.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <p className={`text-sm ${themeClasses.textSecondary} mb-4 line-clamp-2`}>{template.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {new Date(template.createdAt).toLocaleDateString()}
+                  </span>
+                  <button
+                    onClick={() => handleUseTemplate(template)}
+                    className={`px-4 py-2 ${themeClasses.accent} text-white rounded-xl hover:opacity-90 transition-all text-sm`}
+                  >
+                    Use Template
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Default Templates */}
       <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-2xl p-6`}>
-        <h3 className={`text-xl font-semibold ${themeClasses.text} mb-6`}>Campaign Templates</h3>
+        <h3 className={`text-xl font-semibold ${themeClasses.text} mb-6`}>Default Campaign Templates</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             { name: 'Holiday Sale Template', type: 'Conversion', platforms: ['Facebook', 'Instagram'] },
@@ -1979,6 +2084,86 @@ const simulateThinkingTasks = () => {
                 <Check size={16} className="mr-2" />
                 Apply Settings
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save as Template Modal */}
+      {showSaveTemplateModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`${themeClasses.cardBg} rounded-2xl shadow-2xl max-w-md w-full border ${themeClasses.border}`}>
+            {/* Modal Header */}
+            <div className={`border-b ${themeClasses.border} p-6 flex items-center justify-between`}>
+              <div className="flex items-center">
+                <Bookmark className="text-green-500 mr-3" size={24} />
+                <h3 className={`text-xl font-bold ${themeClasses.text}`}>Save as Template</h3>
+              </div>
+              <button
+                onClick={handleCancelSaveTemplate}
+                className={`p-2 rounded-lg ${themeClasses.hover} transition-all`}
+              >
+                <X className={themeClasses.text} size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              <div>
+                <label className={`block text-sm font-medium ${themeClasses.text} mb-2`}>
+                  Template Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="e.g., Summer Sale Campaign"
+                  className={`w-full p-3 ${themeClasses.cardBg} ${themeClasses.border} border rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-green-500`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium ${themeClasses.text} mb-2`}>
+                  Industry
+                </label>
+                <input
+                  type="text"
+                  value={templateIndustry}
+                  onChange={(e) => setTemplateIndustry(e.target.value)}
+                  placeholder="e.g., E-commerce, Technology, Healthcare"
+                  className={`w-full p-3 ${themeClasses.cardBg} ${themeClasses.border} border rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-green-500`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium ${themeClasses.text} mb-2`}>
+                  Description
+                </label>
+                <textarea
+                  value={templateDescription}
+                  onChange={(e) => setTemplateDescription(e.target.value)}
+                  placeholder="Brief description of this template..."
+                  rows={3}
+                  className={`w-full p-3 ${themeClasses.cardBg} ${themeClasses.border} border rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-green-500 resize-none`}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end space-x-3 pt-4">
+                <button
+                  onClick={handleCancelSaveTemplate}
+                  className={`px-4 py-2 ${themeClasses.cardBg} ${themeClasses.border} border rounded-xl ${themeClasses.text} hover:bg-gray-100 transition-all`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmSaveTemplate}
+                  className="flex items-center px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all"
+                >
+                  <Bookmark size={16} className="mr-2" />
+                  Save Template
+                </button>
+              </div>
             </div>
           </div>
         </div>

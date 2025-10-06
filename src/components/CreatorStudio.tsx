@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Image as ImageIcon, Video, Wand2, Settings, Download, Share2, RefreshCw, Plus, ChevronDown, Play, Pause, Eye, Heart, MessageCircle, Send, Check, X, ArrowRight, ArrowLeft, Upload, Palette, Type, LayoutGrid as Layout, Zap, Brain, Cpu, Database, CheckCircle, Clock, AlertCircle, CreditCard as Edit3, Copy, Trash2, MoreHorizontal, Instagram, Facebook, Twitter, Youtube, Linkedin, Globe, Smartphone, Monitor, Tablet, Star, Layers, Filter, Maximize2, Minimize2, BarChart3Icon, Target, AlertTriangle } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, Video, Wand2, Settings, Download, Share2, RefreshCw, Plus, ChevronDown, Play, Pause, Eye, Heart, MessageCircle, Send, Check, X, ArrowRight, ArrowLeft, Upload, Palette, Type, LayoutGrid as Layout, Zap, Brain, Cpu, Database, CheckCircle, Clock, AlertCircle, CreditCard as Edit3, Copy, Trash2, MoreHorizontal, Instagram, Facebook, Twitter, Youtube, Linkedin, Globe, Smartphone, Monitor, Tablet, Star, Layers, Filter, Maximize2, Minimize2, BarChart3 as BarChart3Icon, Target, AlertTriangle, FileType } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { Chatbot } from './Chatbot';
 import video_file from "./video.mp4"
 import img_1 from "./1.jpg"
 interface GeneratedAsset {
@@ -56,7 +57,7 @@ export const CreatorStudio: React.FC = ({setActiveTab}) => {
   const [selectedLogoPlacement, setSelectedLogoPlacement] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
   const [selectedStyling, setSelectedStyling] = useState('');
-  const [contentType, setContentType] = useState<'image' | 'video'>('image');
+  const [contentType, setContentType] = useState<any>('image');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
@@ -70,18 +71,27 @@ export const CreatorStudio: React.FC = ({setActiveTab}) => {
   const [newLogoPlacement, setNewLogoPlacement] = useState('');
   const [newFormat, setNewFormat] = useState('');
   const [newStyling, setNewStyling] = useState('');
+  const [showBrandKitModal, setShowBrandKitModal] = useState(false);
+  const [brandKitSection, setBrandKitSection] = useState('logos');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['instagram']);
   const [previewAsset, setPreviewAsset] = useState<GeneratedAsset | null>(null);
   const [changeRequests, setChangeRequests] = useState('');
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [isVerifyingReference, setIsVerifyingReference] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'passed' | 'failed'>('idle');
+  const [editingAsset, setEditingAsset] = useState<GeneratedAsset | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps: CreationStep[] = [
     { id: 'create', title: 'Create Content', status: 'active', description: 'Generate images/videos with AI' },
-    { id: 'verify', title: 'AI Verification', status: 'pending', description: 'Automated quality checks' },
+    // { id: 'verify', title: 'AI Verification', status: 'pending', description: 'Automated quality checks' },
     { id: 'preview', title: 'Preview', status: 'pending', description: 'Platform-specific previews' },
     { id: 'approval', title: 'Send for Approval', status: 'pending', description: 'Submit for review' }
   ];
 
   const brandKits = ['Default Brand', 'Holiday Theme', 'Minimal Style', 'Corporate'];
+  const creativeTypes = ['image', 'video','Reference Image'];
   const logoPlacement = ['Top Left', 'Top Right', 'Bottom Left', 'Bottom Right', 'Center', 'None'];
   const formats = ['Square (1:1)', 'Portrait (4:5)', 'Landscape (16:9)', 'Story (9:16)', 'Custom'];
   const styling = ['Modern', 'Vintage', 'Minimalist', 'Bold', 'Elegant', 'Playful'];
@@ -107,6 +117,7 @@ export const CreatorStudio: React.FC = ({setActiveTab}) => {
   ];
 
   const handleGenerate = async () => {
+    setSelectedAssets([])
     if (!prompt.trim()) return;
 
     setIsGenerating(true);
@@ -123,8 +134,8 @@ export const CreatorStudio: React.FC = ({setActiveTab}) => {
     // Generate mock assets
 const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
   id: `asset-${Date.now()}-${index}`,
-  type: contentType,
-  url: contentType === 'image'
+  type: contentType=="Reference Image"?"image":contentType,
+  url: contentType === 'image'|| contentType === 'Reference Image'
     ? `https://www.carbodydesign.com/media/2023/02/AI-generated-car-design-02.jpg`
     : `https://www.carbodydesign.com/media/2023/02/AI-generated-car-design-02.jpg ${360 + index * 100}x${360 + index * 100}_1mb.mp4`,
   prompt,
@@ -155,7 +166,7 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
     const newAsset: GeneratedAsset = {
       ...asset,
       id: `asset-${Date.now()}-regenerated`,
-      url: contentType === 'image' 
+      url: contentType === 'image' || contentType === 'Reference Image'
         ? `https://images.pexels.com/photos/${1000000 + Math.floor(Math.random() * 1000000)}/pexels-photo-${1000000 + Math.floor(Math.random() * 1000000)}.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop`
         : `https://sample-videos.com/zip/10/mp4/SampleVideo_720x720_1mb.mp4`
     };
@@ -177,14 +188,63 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
     if (selectedAssets.length === 0) return;
     
     // Move to AI Verification step
-    setActiveStep(1);
-    setTimeout(() => {
-      setActiveStep(2); // Move to Preview after verification
-    }, 3000);
+    setActiveStep(2);
+    // setTimeout(() => {
+    //   setActiveStep(2); // Move to Preview after verification
+    // }, 3000);
   };
 
   const handleApprove = () => {
     setActiveStep(3); // Move to Send for Approval
+  };
+
+  const handleReferenceImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        setReferenceImage(reader.result as string);
+        await verifyReferenceImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const verifyReferenceImage = async (imageUrl: string) => {
+    setIsVerifyingReference(true);
+    setVerificationStatus('verifying');
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const passed = Math.random() > 0.3;
+    setVerificationStatus(passed ? 'passed' : 'failed');
+    setIsVerifyingReference(false);
+  };
+
+  const handleEditAsset = (asset: GeneratedAsset) => {
+    setEditingAsset(asset);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingAsset) {
+      setGeneratedAssets(prev => prev.map(a => a.id === editingAsset.id ? editingAsset : a));
+      setShowEditModal(false);
+      setEditingAsset(null);
+    }
+  };
+
+  const handleDeleteAsset = (assetId: string) => {
+    setGeneratedAssets(prev => prev.filter(a => a.id !== assetId));
+    setSelectedAssets(prev => prev.filter(id => id !== assetId));
+  };
+
+  const handleDuplicateAsset = (asset: GeneratedAsset) => {
+    const newAsset: GeneratedAsset = {
+      ...asset,
+      id: `asset-${Date.now()}-copy`,
+    };
+    setGeneratedAssets(prev => [...prev, newAsset]);
   };
 
   const addNewOption = (type: 'brandKit' | 'logoPlacement' | 'format' | 'styling', value: string) => {
@@ -254,22 +314,8 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
 
   const renderCreateContent = () => (
     <div className="space-y-8">
-      {/* Hero Section */}
-      {/* <div className={`${themeClasses.gradient} rounded-3xl p-8 text-center relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-600/20"></div>
-        <div className="relative z-10">
-          <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Sparkles size={40} className="text-white" />
-          </div>
-          <h2 className={`text-3xl font-bold ${themeClasses.text} mb-4`}>AI-Powered Content Creation</h2>
-          <p className={`text-lg ${themeClasses.textSecondary} max-w-2xl mx-auto`}>
-            Transform your ideas into stunning visuals with our advanced AI technology
-          </p>
-        </div>
-      </div> */}
 
-      {/* Content Type Selection */}
-<div className={`${themeClasses.cardBg} rounded-xl p-4 ${themeClasses.shadow} border-2 ${themeClasses.border}`}>
+{/* <div className={`${themeClasses.cardBg} rounded-xl p-4 ${themeClasses.shadow} border-2 ${themeClasses.border}`}>
  <h3 className={`text-lg font-semibold ${themeClasses.text} mb-2`}>Campaign Selection</h3>
   <div className="grid grid-cols-1 sm:grid-cols-8 gap-4">
     <button
@@ -280,11 +326,6 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
           : `${themeClasses.border} ${themeClasses.cardBg} ${themeClasses.hover}`
       }`}
     >
-      {/* <div className={`rounded-xl flex items-center justify-center mx-auto  transition-all duration-150 ${
-        contentType === 'image' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-500'
-      }`}>
-        <ImageIcon size={24} />
-      </div> */}
       <h4 className={`text-lg font-medium mb-1 ${contentType === 'image' ? 'text-blue-900' : themeClasses.text}`}>
         Image Generation
       </h4>
@@ -298,56 +339,43 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
           : `${themeClasses.border} ${themeClasses.cardBg} ${themeClasses.hover}`
       }`}
     >
-      {/* <div className={` rounded-xl flex items-center justify-center mx-auto  transition-all duration-150 ${
-        contentType === 'video' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-500'
-      }`}>
-        <Video size={24} />
-      </div> */}
+
       <h4 className={`text-lg font-medium mb-1 ${contentType === 'video' ? 'text-blue-900' : themeClasses.text}`}>
         Video Generation
       </h4>
     </button>
   </div>
-</div>
-
-
-
-      {/* Prompt Input */}
-      <div className={`${themeClasses.cardBg} rounded-3xl p-8 ${themeClasses.shadow} border-2 ${themeClasses.border}`}>
-        <h3 className={`text-2xl font-bold ${themeClasses.text} mb-6 flex items-center`}>
-          <Wand2 className="mr-3 text-blue-500" size={28} />
-          Creative Prompt
-        </h3>
-        <div className="relative">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder={`Describe the ${contentType} you want to create... Be specific about style, colors, mood, and content.`}
-            className={`w-full p-6 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-2xl ${themeClasses.text} focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 resize-none text-lg transition-all duration-300`}
-            rows={6}
-          />
-          <div className="absolute bottom-4 right-4 flex items-center space-x-4">
-            <span className={`text-sm ${themeClasses.textSecondary}`}>
-              {prompt.length}/500 characters
-            </span>
-            <button
-              onClick={() => setPrompt(prompt + ' in professional style with modern aesthetics')}
-              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors text-sm font-medium"
-            >
-              Add Style
-            </button>
-          </div>
-        </div>
-      </div>
+</div> */}
 
       {/* Configuration Options */}
       <div className={`${themeClasses.cardBg} rounded-3xl p-8 ${themeClasses.shadow} border-2 ${themeClasses.border}`}>
-        {/* <h3 className={`text-2xl font-bold ${themeClasses.text} mb-8 flex items-center`}>
+        <h3 className={`text-2xl font-bold ${themeClasses.text} mb-8 flex items-center`}>
           <Settings className="mr-3 text-blue-500" size={28} />
           Configuration Options
         </h3>
-         */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+         {/* Creation Type Dropdown */}
+          <div className="space-y-3">
+            <label className={`block text-lg font-semibold ${themeClasses.text} flex items-center`}>
+              <FileType className="mr-2 text-blue-500" size={20} />
+             Creation Type
+            </label>
+            <div className="relative">
+              <select
+                value={contentType}
+                onChange={(e) => setContentType(e.target.value)}
+                className={`w-full p-4 capitalize ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-2xl ${themeClasses.text} focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 appearance-none text-lg`}
+              >
+                {/* <option value="">Image</option> */}
+                {creativeTypes.map(kit => (
+                  <option key={kit} className='capitalize'  value={kit}>{kit}</option>
+                ))}
+              </select>
+              <ChevronDown className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${themeClasses.textSecondary}`} size={24} />
+            </div>
+          </div>
+
           {/* Brand Kit Dropdown */}
           <div className="space-y-3">
             <label className={`block text-lg font-semibold ${themeClasses.text} flex items-center`}>
@@ -368,7 +396,7 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
               <ChevronDown className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${themeClasses.textSecondary}`} size={24} />
             </div>
             <button
-              onClick={() => setShowAddBrandKit(true)}
+              onClick={() => setShowBrandKitModal(true)}
               className="flex items-center text-blue-600 hover:text-blue-700 transition-colors font-medium"
             >
               <Plus size={18} className="mr-2" />
@@ -395,13 +423,13 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
               </select>
               <ChevronDown className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${themeClasses.textSecondary}`} size={24} />
             </div>
-            <button
+            {/* <button
               onClick={() => setShowAddLogoPlacement(true)}
               className="flex items-center text-blue-600 hover:text-blue-700 transition-colors font-medium"
             >
               <Plus size={18} className="mr-2" />
               Add New Placement
-            </button>
+            </button> */}
           </div>
 
           {/* Format Dropdown */}
@@ -423,13 +451,13 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
               </select>
               <ChevronDown className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${themeClasses.textSecondary}`} size={24} />
             </div>
-            <button
+            {/* <button
               onClick={() => setShowAddFormat(true)}
               className="flex items-center text-blue-600 hover:text-blue-700 transition-colors font-medium"
             >
               <Plus size={18} className="mr-2" />
               Add New Format
-            </button>
+            </button> */}
           </div>
 
           {/* Styling Dropdown */}
@@ -451,16 +479,151 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
               </select>
               <ChevronDown className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${themeClasses.textSecondary}`} size={24} />
             </div>
-            <button
+            {/* <button
               onClick={() => setShowAddStyling(true)}
               className="flex items-center text-blue-600 hover:text-blue-700 transition-colors font-medium"
             >
               <Plus size={18} className="mr-2" />
               Add New Style
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
+
+      {/* Reference Image Upload */}
+      {contentType=="Reference Image"&&<div className={`${themeClasses.cardBg} rounded-3xl p-8 ${themeClasses.shadow} border-2 ${themeClasses.border}`}>
+        <h3 className={`text-2xl font-bold ${themeClasses.text} mb-6 flex items-center`}>
+          <Upload className="mr-3 text-blue-500" size={28} />
+          Reference Image
+        </h3>
+        <p className={`${themeClasses.textSecondary} mb-6`}>
+          Upload a reference image to guide AI generation. The system will verify it matches your brand guidelines.
+        </p>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleReferenceImageUpload}
+          className="hidden"
+        />
+
+        {!referenceImage ? (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full p-12 border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
+          >
+            <div className="flex flex-col items-center">
+              <Upload className="text-gray-400 group-hover:text-blue-500 mb-4" size={48} />
+              <p className={`text-lg font-semibold ${themeClasses.text} mb-2`}>
+                Click to upload reference image
+              </p>
+              <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
+            </div>
+          </button>
+        ) : (
+          <div className="space-y-4">
+            <div className="relative rounded-2xl overflow-hidden border-2 border-gray-200">
+              <img src={referenceImage} alt="Reference" className="w-full h-64 object-cover" />
+              <button
+                onClick={() => {
+                  setReferenceImage(null);
+                  setVerificationStatus('idle');
+                }}
+                className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {isVerifyingReference && (
+              <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-2xl">
+                <div className="flex items-center space-x-4">
+                  <div className="animate-spin">
+                    <Brain className="text-blue-600" size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-blue-900">Verifying against Brand Kit...</p>
+                    <p className="text-sm text-blue-700">Checking colors, style, and compliance</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {verificationStatus === 'passed' && (
+              <div className="p-6 bg-green-50 border-2 border-green-200 rounded-2xl">
+                <div className="flex items-center space-x-4">
+                  <CheckCircle className="text-green-600" size={24} />
+                  <div className="flex-1">
+                    <p className="font-semibold text-green-900">Verification Passed</p>
+                    <p className="text-sm text-green-700">
+                      Reference image matches brand guidelines. Proceeding with generation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {verificationStatus === 'failed' && (
+              <div className="p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
+                <div className="flex items-center space-x-4">
+                  <AlertCircle className="text-red-600" size={24} />
+                  <div className="flex-1">
+                    <p className="font-semibold text-red-900">Verification Failed</p>
+                    <p className="text-sm text-red-700 mb-3">
+                      Reference image doesn't fully align with brand guidelines. Colors or style may differ.
+                    </p>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                      >
+                        Upload Different Image
+                      </button>
+                      <button
+                        onClick={() => setVerificationStatus('passed')}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
+                      >
+                        Proceed Anyway
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>}
+
+      {/* Prompt Input */}
+      {(verificationStatus === 'passed' || contentType =="image" || contentType =="video")?<div className={`${themeClasses.cardBg} rounded-3xl p-8 ${themeClasses.shadow} border-2 ${themeClasses.border} `}>
+        <h3 className={`text-2xl font-bold ${themeClasses.text} mb-6 flex items-center`}>
+          <Wand2 className="mr-3 text-blue-500" size={28} />
+          Creative Prompt
+        </h3>
+        <div className="relative">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder={`Describe the ${contentType} you want to create... Be specific about style, colors, mood, and content.`}
+            className={`w-full p-6 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-2xl ${themeClasses.text} focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 resize-none text-lg transition-all duration-300`}
+            rows={6}
+          />
+          <div className="absolute bottom-4 right-4 flex items-center space-x-4">
+            <span className={`text-sm ${themeClasses.textSecondary}`}>
+              {prompt.length}/500 characters
+            </span>
+            <button
+              onClick={() => setPrompt(prompt + ' in professional style with modern aesthetics')}
+              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors text-sm font-medium"
+            >
+              Add Style
+            </button>
+          </div>
+        </div>
+      </div>:null}
+
+
 
       {/* Generation Process */}
       {isGenerating && (
@@ -542,11 +705,12 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
                 {selectedAssets.length} of {generatedAssets.length} selected
               </span>
               <button
-                onClick={handleSaveAssets}
-                disabled={selectedAssets.length === 0}
+                // onClick={handleSaveAssets}
+                disabled={selectedAssets.length === 0 || isGenerating}
+                onClick={handleGenerate}
                 className={`px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-500  text-white rounded-2xl hover:from-blue-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg shadow-xl shadow-blue-500/30`}
               >
-                Save Selected ({selectedAssets.length})
+                Regenerate Selected ({selectedAssets.length})
               </button>
             </div>
           </div>
@@ -555,7 +719,7 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
             {generatedAssets.map((asset) => (
               <div key={asset.id} className={`group relative ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-3xl p-6 transition-all hover:shadow-2xl hover:shadow-blue-500/20 ${selectedAssets.includes(asset.id) ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-50' : ''}`}>
                 <div className="aspect-square bg-gray-100 rounded-2xl mb-6 overflow-hidden relative">
-                  {asset.type === 'image' ? (
+                  {asset.type === 'image'? (
                     <img 
                       src={img_1} 
                       alt="Generated content"
@@ -603,17 +767,58 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
                         <RefreshCw size={18} />
                       </button>
                       <button
+                        onClick={() => handleEditAsset(asset)}
                         className="p-3 bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors"
                         title="Edit"
                       >
                         <Edit3 size={18} />
                       </button>
-                      <button
-                        className="p-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors"
-                        title="More options"
-                      >
-                        <MoreHorizontal size={18} />
-                      </button>
+                      <div className="relative group/menu">
+                        <button
+                          className="p-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors"
+                          title="More options"
+                        >
+                          <MoreHorizontal size={18} />
+                        </button>
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border-2 border-gray-200 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10">
+                          <button
+                            onClick={() => handleDuplicateAsset(asset)}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-2 text-sm"
+                          >
+                            <Copy size={16} />
+                            <span>Duplicate</span>
+                          </button>
+                          <button
+                            onClick={() => {}}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-2 text-sm"
+                          >
+                            <Download size={16} />
+                            <span>Download</span>
+                          </button>
+                          <button
+                            onClick={() => setPreviewAsset(asset)}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-2 text-sm"
+                          >
+                            <Eye size={16} />
+                            <span>Preview</span>
+                          </button>
+                          <button
+                            onClick={() => {}}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-2 text-sm"
+                          >
+                            <Share2 size={16} />
+                            <span>Share</span>
+                          </button>
+                          <div className="border-t border-gray-200"></div>
+                          <button
+                            onClick={() => handleDeleteAsset(asset.id)}
+                            className="w-full px-4 py-3 text-left hover:bg-red-50 flex items-center space-x-2 text-sm text-red-600"
+                          >
+                            <Trash2 size={16} />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -624,7 +829,7 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
       )}
 
       {/* Generate Button */}
-      <div className="flex justify-center">
+      {!generatedAssets.length&&<div className="flex justify-center">
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || isGenerating}
@@ -640,11 +845,20 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
           ) : (
             <>
               <Wand2 size={32} className="mr-4 group-hover:rotate-12 transition-transform" />
-              Generate {contentType === 'image' ? 'Images' : 'Videos'}
+              Generate {contentType === 'image' || contentType === 'Reference Image' ? 'Images' : 'Videos'}
             </>
           )}
         </button>
-      </div>
+      </div>}
+{generatedAssets.length?<div className="flex justify-center">
+       <button
+                onClick={handleSaveAssets}
+                disabled={selectedAssets.length === 0 || isGenerating}
+                className={`px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-500  text-white rounded-2xl hover:from-blue-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg shadow-xl shadow-blue-500/30`}
+              >
+               Save and next ({selectedAssets.length})
+              </button>
+      </div>:null}
     </div>
   );
 
@@ -861,10 +1075,10 @@ const mockAssets: GeneratedAsset[] = Array.from({ length: 6 }, (_, index) => ({
       {/* Action Buttons */}
       <div className="flex justify-center space-x-4">
         <button
-          onClick={() => setActiveStep(1)}
+          onClick={() => setActiveStep(0)}
           className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors font-medium"
         >
-          Back to Verification
+          Back to Create Content
         </button>
         <button
           onClick={handleApprove}
@@ -912,14 +1126,21 @@ const [approvalFlag,setApprovalFlag] = useState<boolean>()
         </div>
         
         <div className="flex justify-center gap-4 mt-8">
+            <button
+          onClick={() => setActiveStep(2)}
+          className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors font-medium"
+        >
+          Back to Preview
+        </button>
           <button onClick={()=>setApprovalFlag(true)} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-500  text-white rounded-xl hover:from-blue-600 hover:to-blue-600 transition-all font-bold shadow-lg shadow-blue-500/30">
             Submit for Approval
           </button>
            <button onClick={()=>setActiveTab("marketingstudio")}  className={`${true?"from-blue-500 to-blue-500  text-white  hover:from-blue-600 hover:to-blue-600  shadow-blue-500/30":"bg-gray-300 text-black"} px-8 py-3 bg-gradient-to-r rounded-xl transition-all font-bold shadow-lg`}>
             Run Campaign
           </button>
-        </div>
       </div>
+        </div>
+  
     </div>
   );
 
@@ -1017,7 +1238,7 @@ const [approvalFlag,setApprovalFlag] = useState<boolean>()
             Select a campaign to create targeted creatives, or proceed without a campaign for general assets
           </p>
         </div>
-        <Target className={`${themeClasses.textSecondary}`} size={24} />
+        {/* <Target className={`${themeClasses.textSecondary}`} size={24} /> */}
       </div>
 
       <div className="relative">
@@ -1154,6 +1375,191 @@ const [approvalFlag,setApprovalFlag] = useState<boolean>()
       {activeStep === 2 && renderPreview()}
       {activeStep === 3 && renderSendForApproval()}
       
+      {/* Brand Kit Modal */}
+      {showBrandKitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className={`${themeClasses.cardBg} rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl`}>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Palette className="text-white" size={28} />
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Brand Kit Manager</h2>
+                  <p className="text-blue-100 text-sm">Create and manage your brand assets</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowBrandKitModal(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X className="text-white" size={24} />
+              </button>
+            </div>
+
+            {/* Section Navigation */}
+            <div className={`p-4 border-b ${themeClasses.border}`}>
+              <div className="flex space-x-2 overflow-x-auto">
+                {[
+                  { id: 'logos', label: 'Logos', icon: ImageIcon },
+                  { id: 'colors', label: 'Color Palettes', icon: Palette },
+                  { id: 'fonts', label: 'Fonts', icon: Type },
+                  { id: 'images', label: 'Image Style', icon: ImageIcon }
+                ].map((section) => {
+                  const Icon = section.icon;
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setBrandKitSection(section.id)}
+                      className={`flex items-center px-4 py-2 rounded-xl font-medium transition-all duration-300 whitespace-nowrap ${
+                        brandKitSection === section.id
+                          ? 'bg-blue-500 text-white shadow-lg'
+                          : `${themeClasses.text} ${themeClasses.hover}`
+                      }`}
+                    >
+                      <Icon size={16} className="mr-2" />
+                      <span className="text-sm">{section.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {brandKitSection === 'logos' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`text-xl font-semibold ${themeClasses.text}`}>Logos</h3>
+                      <p className={`${themeClasses.textSecondary} text-sm mt-1`}>
+                        Save multiple logos to easily apply while generating assets
+                      </p>
+                    </div>
+                    <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                      <Upload size={18} className="mr-2" />
+                      Upload Logo
+                    </button>
+                  </div>
+
+                  <div className={`border-2 border-dashed ${themeClasses.border} rounded-2xl p-12 text-center ${themeClasses.hover} transition-all cursor-pointer`}>
+                    <Upload className={`${themeClasses.textSecondary} mx-auto mb-4`} size={48} />
+                    <h4 className={`${themeClasses.text} font-medium mb-2`}>Drop logo files here</h4>
+                    <p className={`${themeClasses.textSecondary} text-sm`}>or click to browse (SVG, PNG, JPG)</p>
+                  </div>
+                </div>
+              )}
+
+              {brandKitSection === 'colors' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`text-xl font-semibold ${themeClasses.text}`}>Color Palettes</h3>
+                      <p className={`${themeClasses.textSecondary} text-sm mt-1`}>
+                        Define your brand colors for consistent styling
+                      </p>
+                    </div>
+                    <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                      <Plus size={18} className="mr-2" />
+                      New Color
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { name: 'Primary', hex: '#3B82F6' },
+                      { name: 'Secondary', hex: '#10B981' },
+                      { name: 'Accent', hex: '#F59E0B' },
+                      { name: 'Dark', hex: '#1F2937' }
+                    ].map((color, idx) => (
+                      <div key={idx} className={`${themeClasses.border} border rounded-xl p-4`}>
+                        <div
+                          className="aspect-square rounded-lg mb-3 cursor-pointer hover:scale-105 transition-transform"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                        <h4 className={`${themeClasses.text} font-medium text-sm`}>{color.name}</h4>
+                        <p className={`${themeClasses.textSecondary} text-xs mt-1`}>{color.hex}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {brandKitSection === 'fonts' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`text-xl font-semibold ${themeClasses.text}`}>Fonts</h3>
+                      <p className={`${themeClasses.textSecondary} text-sm mt-1`}>
+                        Set typography standards for your brand
+                      </p>
+                    </div>
+                    <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                      <Plus size={18} className="mr-2" />
+                      Add Font
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {['Inter', 'Roboto'].map((font, idx) => (
+                      <div key={idx} className={`${themeClasses.border} border rounded-xl p-6`}>
+                        <div className={`${themeClasses.gradient} rounded-xl p-4 mb-4`}>
+                          <div className={`text-3xl font-bold ${themeClasses.text}`} style={{ fontFamily: font }}>
+                            Aa
+                          </div>
+                        </div>
+                        <h4 className={`${themeClasses.text} font-medium`}>{font}</h4>
+                        <p className={`${themeClasses.textSecondary} text-sm mt-1`}>Primary Font</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {brandKitSection === 'images' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`text-xl font-semibold ${themeClasses.text}`}>Image Style</h3>
+                      <p className={`${themeClasses.textSecondary} text-sm mt-1`}>
+                        Define visual style guidelines for your brand
+                      </p>
+                    </div>
+                    <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                      <Upload size={18} className="mr-2" />
+                      Upload Style
+                    </button>
+                  </div>
+
+                  <div className={`border-2 border-dashed ${themeClasses.border} rounded-2xl p-12 text-center ${themeClasses.hover} transition-all cursor-pointer`}>
+                    <ImageIcon className={`${themeClasses.textSecondary} mx-auto mb-4`} size={48} />
+                    <h4 className={`${themeClasses.text} font-medium mb-2`}>Upload reference images</h4>
+                    <p className={`${themeClasses.textSecondary} text-sm`}>Define your brand's visual style</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className={`p-6 border-t ${themeClasses.border} flex justify-end space-x-3`}>
+              <button
+                onClick={() => setShowBrandKitModal(false)}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowBrandKitModal(false);
+                }}
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors"
+              >
+                Save Brand Kit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Brand Kit Modal */}
       {showAddBrandKit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3">
@@ -1273,6 +1679,143 @@ const [approvalFlag,setApprovalFlag] = useState<boolean>()
           </div>
         </div>
       )}
+
+      {/* Edit Asset Modal */}
+      {showEditModal && editingAsset && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`${themeClasses.cardBg} rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-2xl font-bold ${themeClasses.text}`}>Edit Asset</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Asset Preview */}
+              <div className="rounded-2xl overflow-hidden border-2 border-gray-200">
+                {editingAsset.type === 'image' ? (
+                  <img src={img_1} alt="Editing" className="w-full h-64 object-cover" />
+                ) : (
+                  <video className="w-full h-64" controls>
+                    <source src={video_file} type="video/mp4" />
+                  </video>
+                )}
+              </div>
+
+              {/* Edit Options */}
+              <div className="space-y-4">
+                <div>
+                  <label className={`block text-sm font-semibold ${themeClasses.text} mb-2`}>
+                    Prompt
+                  </label>
+                  <textarea
+                    value={editingAsset.prompt}
+                    onChange={(e) => setEditingAsset({ ...editingAsset, prompt: e.target.value })}
+                    className={`w-full p-4 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeClasses.text} mb-2`}>
+                      Brand Kit
+                    </label>
+                    <select
+                      value={editingAsset.brandKit}
+                      onChange={(e) => setEditingAsset({ ...editingAsset, brandKit: e.target.value })}
+                      className={`w-full p-3 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="">Select Brand Kit</option>
+                      {brandKits.map(kit => (
+                        <option key={kit} value={kit}>{kit}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeClasses.text} mb-2`}>
+                      Logo Placement
+                    </label>
+                    <select
+                      value={editingAsset.logoPlacement}
+                      onChange={(e) => setEditingAsset({ ...editingAsset, logoPlacement: e.target.value })}
+                      className={`w-full p-3 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="">Select Placement</option>
+                      {logoPlacement.map(place => (
+                        <option key={place} value={place}>{place}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeClasses.text} mb-2`}>
+                      Format
+                    </label>
+                    <select
+                      value={editingAsset.format}
+                      onChange={(e) => setEditingAsset({ ...editingAsset, format: e.target.value })}
+                      className={`w-full p-3 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="">Select Format</option>
+                      {formats.map(format => (
+                        <option key={format} value={format}>{format}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeClasses.text} mb-2`}>
+                      Styling
+                    </label>
+                    <select
+                      value={editingAsset.styling}
+                      onChange={(e) => setEditingAsset({ ...editingAsset, styling: e.target.value })}
+                      className={`w-full p-3 ${themeClasses.cardBg} border-2 ${themeClasses.border} rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="">Select Style</option>
+                      {styling.map(style => (
+                        <option key={style} value={style}>{style}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleSaveEdit}
+                  className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => handleRegenerateAsset(editingAsset.id)}
+                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors flex items-center justify-center"
+                >
+                  <RefreshCw size={18} className="mr-2" />
+                  Regenerate
+                </button>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chatbot */}
+      <Chatbot currentPage="Creator Studio" />
     </div>
           <style jsx>{`
         @keyframes fade-in {
