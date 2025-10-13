@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CheckCircle, Calendar, Play, Pause, TrendingUp, Eye, MousePointer, DollarSign, Target, Sparkles, Image as ImageIcon, Video, FileText, Download, CreditCard as Edit3, Copy, Trash2, Settings, BarChart3, AlertTriangle, ThumbsUp, Clock, Users, Globe, Activity, Zap, Bot, ArrowRight, ChevronRight, ExternalLink, Filter, Search, CalendarCheck, FolderOpen, TrendingDown, AlertCircle, Plus, ChevronDown, ChevronUp, CheckCircle2, Info, Settings2, Rocket } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { PromotionCalendar } from "./PromotionCalendar";
 import { CampaignDetailView } from "./CampaignDetailView";
 import { CampaignExecution } from "./CampaignExecution";
+import { ComparativePerformance } from "./ComparativePerformance";
+import { fetchProducts, Product } from "../services/campaignService";
 
 interface Creative {
   id: string;
@@ -71,7 +73,7 @@ interface MetricCard {
 export const MarketingStudio: React.FC = () => {
   const { getThemeClasses } = useTheme();
   const themeClasses = getThemeClasses();
-  const [activeSection, setActiveSection] = useState<"overview" | "scheduler" | "calendar" | "run">("overview");
+  const [activeSection, setActiveSection] = useState<"overview" | "scheduler" | "calendar" | "run" | "performance">("overview");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [campaignToRun, setCampaignToRun] = useState<Campaign | null>(null);
   const [campaignStatus, setCampaignStatus] = useState<"paused" | "running">("paused");
@@ -80,9 +82,28 @@ export const MarketingStudio: React.FC = () => {
   const [campaignDetailTab, setCampaignDetailTab] = useState<"overview" | "creatives" | "performance" | "timeline">("overview");
   const [expandedStep, setExpandedStep] = useState<number | null>(1);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      const data = await fetchProducts();
+      setProducts(data);
+      if (data.length > 0) {
+        setSelectedProduct(data[0]);
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  };
 
   const sections = [
     { id: "overview", label: "Campaign Overview", icon: FolderOpen },
+    { id: "performance", label: "Performance", icon: BarChart3 },
     { id: "scheduler", label: "Campaign Scheduler", icon: Target },
     { id: "calendar", label: "Calendar", icon: Calendar },
     { id: "run", label: "Run Campaign", icon: Rocket },
@@ -931,29 +952,72 @@ export const MarketingStudio: React.FC = () => {
           </p>
         </div>
 
-        <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-xl p-2`}>
-          <div className="flex space-x-2 overflow-x-auto">
-            {sections.map((section) => {
-              const Icon = section.icon;
-              return (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id as any)}
-                  className={`flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 whitespace-nowrap ${
-                    activeSection === section.id
-                      ? `${themeClasses.accent} text-white shadow-lg`
-                      : `${themeClasses.text} ${themeClasses.hover}`
-                  }`}
-                >
-                  <Icon size={18} className="mr-2" />
-                  {section.label}
-                </button>
-              );
-            })}
+        <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-2xl overflow-hidden`}>
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex gap-2 border-b border-gray-200 -mb-px">
+              {sections.map((section) => {
+                const Icon = section.icon;
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id as any)}
+                    className={`px-4 py-2 font-medium text-sm transition-all border-b-2 ${
+                      activeSection === section.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-700 hover:text-blue-500'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Icon size={16} />
+                      <span>{section.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {activeSection === "overview" && renderCampaignOverview()}
+        {activeSection === "performance" && (
+          <div className="space-y-6">
+            {products.length > 0 && (
+              <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-xl p-4`}>
+                <label className={`block text-sm font-medium ${themeClasses.text} mb-2`}>
+                  Select Product
+                </label>
+                <select
+                  value={selectedProduct?.id || ''}
+                  onChange={(e) => {
+                    const product = products.find(p => p.id === e.target.value);
+                    setSelectedProduct(product || null);
+                  }}
+                  className={`w-full px-4 py-2 ${themeClasses.cardBg} ${themeClasses.border} border rounded-lg text-sm ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                >
+                  {products.map(product => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {selectedProduct ? (
+              <ComparativePerformance
+                productId={selectedProduct.id}
+                productName={selectedProduct.name}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <AlertCircle className="mx-auto text-gray-400 mb-3" size={48} />
+                <p className={`text-lg font-semibold ${themeClasses.text} mb-1`}>No Products Available</p>
+                <p className={`text-sm ${themeClasses.textSecondary}`}>
+                  Please add products to view performance comparisons
+                </p>
+              </div>
+            )}
+          </div>
+        )}
         {activeSection === "scheduler" && renderCampaignScheduler()}
         {activeSection === "calendar" && <PromotionCalendar />}
         {activeSection === "run" && campaignToRun && (
