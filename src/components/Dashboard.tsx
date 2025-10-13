@@ -570,6 +570,82 @@ export const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
             ))}
           </div>
         </div>
+        {/* <div className='flex w-full justify-center'>
+          <button 
+                onClick={handleCreateCampaign}
+                className="w-[200px] py-3 px-6 text-white bg-blue-600 rounded-xl hover:text-blue-50 transition-all font-medium flex gap-2 items-center"
+              >
+                <Plus className="inline mr-2" size={16} />
+                Create with AI
+              </button>
+
+   </div> */}
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Get Inspired */}
+          <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl border border-orange-200 p-8 hover:border-orange-300 hover:shadow-lg transition-all group cursor-pointer">
+            <div className="flex items-start space-x-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-600">
+                <Lightbulb className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-orange-600 transition-colors">
+                  Get Inspired
+                </h3>
+                <p className="text-slate-600 mb-4">
+                  Create a new campaign based on performance of executed campaigns. Let AI analyze your best performers and suggest optimizations.
+                </p>
+                <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-600 text-white hover:shadow-lg rounded-md text-sm font-medium transition-shadow">
+                  Browse Insights
+                  <ArrowUpRight className="h-4 w-4 ml-2" />
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* KRAFT Agent */}
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl border border-blue-200 p-8 hover:border-blue-300 hover:shadow-lg transition-all group cursor-pointer">
+            <div className="flex items-start space-x-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                  KRAFT Agent
+                </h3>
+                <p className="text-slate-600 mb-4">
+                  Create a new campaign using agentic AI. Let KRAFT Agent build, optimize, and launch campaigns with intelligent automation.
+                </p>
+                <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg rounded-md text-sm font-medium transition-shadow">
+                  Launch Agent
+                  <Sparkles className="h-4 w-4 ml-2" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Quick Actions */}
+        {/* <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-2xl p-6`}>
+          <h3 className={`text-lg font-semibold ${themeClasses.text} mb-4`}>Quick Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button className={`p-4 ${themeClasses.border} border rounded-xl ${themeClasses.hover} transition-colors text-center`}>
+              <Download className={`mx-auto mb-2 ${themeClasses.textSecondary}`} size={24} />
+              <p className={`text-sm font-medium ${themeClasses.text}`}>Export Data</p>
+            </button>
+            <button className={`p-4 ${themeClasses.border} border rounded-xl ${themeClasses.hover} transition-colors text-center`}>
+              <Share2 className={`mx-auto mb-2 ${themeClasses.textSecondary}`} size={24} />
+              <p className={`text-sm font-medium ${themeClasses.text}`}>Share Report</p>
+            </button>
+            <button className={`p-4 ${themeClasses.border} border rounded-xl ${themeClasses.hover} transition-colors text-center`}>
+              <Calendar className={`mx-auto mb-2 ${themeClasses.textSecondary}`} size={24} />
+              <p className={`text-sm font-medium ${themeClasses.text}`}>Schedule Report</p>
+            </button>
+            <button className={`p-4 ${themeClasses.border} border rounded-xl ${themeClasses.hover} transition-colors text-center`}>
+              <BarChart3 className={`mx-auto mb-2 ${themeClasses.textSecondary}`} size={24} />
+              <p className={`text-sm font-medium ${themeClasses.text}`}>Advanced Analytics</p>
+            </button>
+          </div>
+        </div> */}
       </div>
 
       <style jsx>{`

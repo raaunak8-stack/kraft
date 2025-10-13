@@ -41,18 +41,18 @@ export const PromotionCalendar: React.FC<PromotionCalendarProps> = ({ onSchedule
     "TV",
     "Radio",
     "Newspaper",
-    // "Display",
-    // "Exhibition",
-    // "CSP",
-    // "OOH",
-    // "OFM",
-    // "Bazaar_day",
-    // "Crop_seminar",
-    // "Demo",
-    // "JCSP",
-    // "Sub_dealer_coop_meeting",
-    // "Exhibition_yatra",
-    // "Misc",
+    "Display",
+    "Exhibition",
+    "CSP",
+    "OOH",
+    "OFM",
+    "Bazaar_day",
+    "Crop_seminar",
+    "Demo",
+    "JCSP",
+    "Sub_dealer_coop_meeting",
+    "Exhibition_yatra",
+    "Misc",
   ];
 
   const campaigns: Campaign[] = [
@@ -300,7 +300,7 @@ export const PromotionCalendar: React.FC<PromotionCalendarProps> = ({ onSchedule
             </button>
           </div>
 
-          {/* <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <span className={`text-sm ${themeClasses.textSecondary}`}>
               {campaigns.length} campaigns
             </span>
@@ -310,7 +310,7 @@ export const PromotionCalendar: React.FC<PromotionCalendarProps> = ({ onSchedule
               <Plus size={16} />
               <span>Add Campaign</span>
             </button>
-          </div> */}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">

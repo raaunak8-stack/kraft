@@ -14,9 +14,7 @@ import {
   AlertCircle,
   TrendingUp,
   Zap,
-  ChevronDown,
-  Sparkles,
-  Image as ImageIcon
+  ChevronDown
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -466,62 +464,6 @@ export const CampaignExecution: React.FC<CampaignExecutionProps> = ({ campaign, 
                   </div>
                 );
               })}
-            </div>
-
-            <div className={`${themeClasses.cardBg} ${themeClasses.border} border rounded-2xl p-6`}>
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <Sparkles className="text-white" size={24} />
-                </div>
-                <h3 className={`text-xl font-bold ${themeClasses.text}`}>AI Insights</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-5 rounded-xl bg-red-50 border-l-4 border-red-500">
-                  <div className="flex items-start space-x-3 mb-4">
-                    <Zap className="text-blue-600 flex-shrink-0 mt-1" size={20} />
-                    <div className="flex-1">
-                      <h4 className={`font-bold ${themeClasses.text} mb-1`}>Budget Reallocation</h4>
-                      <p className={`text-sm ${themeClasses.textSecondary} leading-relaxed`}>
-                        Facebook ads showing 15% higher CTR. Consider increasing budget by 20%.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
-                    Apply Now
-                  </button>
-                </div>
-
-                <div className="p-5 rounded-xl bg-yellow-50 border-l-4 border-yellow-500">
-                  <div className="flex items-start space-x-3 mb-4">
-                    <AlertCircle className="text-yellow-600 flex-shrink-0 mt-1" size={20} />
-                    <div className="flex-1">
-                      <h4 className={`font-bold ${themeClasses.text} mb-1`}>Creative Fatigue</h4>
-                      <p className={`text-sm ${themeClasses.textSecondary} leading-relaxed`}>
-                        Ad creative performance dropped 8% over last 2 days. Consider refreshing assets.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
-                    Review
-                  </button>
-                </div>
-
-                <div className="p-5 rounded-xl bg-green-50 border-l-4 border-green-500">
-                  <div className="flex items-start space-x-3 mb-4">
-                    <CheckCircle2 className="text-green-600 flex-shrink-0 mt-1" size={20} />
-                    <div className="flex-1">
-                      <h4 className={`font-bold ${themeClasses.text} mb-1`}>Peak Performance Window</h4>
-                      <p className={`text-sm ${themeClasses.textSecondary} leading-relaxed`}>
-                        Best engagement detected between 6-9 PM. Schedule adjusted automatically.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
-                    View Details
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         );

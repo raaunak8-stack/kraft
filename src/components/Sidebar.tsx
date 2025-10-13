@@ -25,15 +25,13 @@ interface SidebarProps {
 
 const mainMenuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3, color: 'text-blue-600' },
-  // { id: 'brandmanager', label: 'Brand Manager', icon: Activity, color: 'text-emerald-600' },
+  { id: 'brandmanager', label: 'Brand Manager', icon: Activity, color: 'text-emerald-600' },
   { id: 'strategy', label: 'Campaign Studio', icon: Target, color: 'text-green-600' },
-  { id: 'creator', label: 'Creator Studio', icon: Sparkles, color: 'text-blue-600' },
   { id: 'marketingstudio', label: 'Marketing Studio', icon: Megaphone, color: 'text-teal-600' },
-  // { id: 'marketingstudio2', label: 'Marketing Studio 2', icon: Megaphone, color: 'text-teal-600' },
-  // { id: 'marketingstudio3', label: 'Marketing Studio 3', icon: Megaphone, color: 'text-teal-600' },
+  { id: 'creator', label: 'Creator Studio', icon: Sparkles, color: 'text-blue-600' },
   { id: 'brandkit', label: 'Brand Kit', icon: PaletteIcon, color: 'text-indigo-600' },
-  // { id: 'performanceagent', label: 'Agency Performance Monitor', icon: Activity, color: 'text-purple-600' },
-  // { id: 'strategy1', label: 'Campaign Studio New', icon: Target, color: 'text-green-600' },
+  { id: 'performanceagent', label: 'Agency Performance Monitor', icon: Activity, color: 'text-purple-600' },
+  { id: 'strategy1', label: 'Campaign Studio New', icon: Target, color: 'text-green-600' },
 ];
 
 const performanceGovernanceItems = [

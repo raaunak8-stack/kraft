@@ -77,16 +77,15 @@ export const MarketingStudio: React.FC = () => {
   const [campaignStatus, setCampaignStatus] = useState<"paused" | "running">("paused");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [campaignDetailTab, setCampaignDetailTab] = useState<"overview" | "creatives" | "performance" | "timeline" | "schedule">("overview");
+  const [campaignDetailTab, setCampaignDetailTab] = useState<"overview" | "creatives" | "performance" | "timeline">("overview");
   const [expandedStep, setExpandedStep] = useState<number | null>(1);
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   const sections = [
     { id: "overview", label: "Campaign Overview", icon: FolderOpen },
-    // { id: "scheduler", label: "Campaign Scheduler", icon: Target },
-      { id: "run", label: "Run Campaign", icon: Rocket },
+    { id: "scheduler", label: "Campaign Scheduler", icon: Target },
     { id: "calendar", label: "Calendar", icon: Calendar },
-  
+    { id: "run", label: "Run Campaign", icon: Rocket },
   ];
 
   const approvedCampaigns: Campaign[] = [
@@ -922,7 +921,7 @@ export const MarketingStudio: React.FC = () => {
           <div className="flex items-center space-x-3 mb-2">
             <Target className={`${themeClasses.text}`} size={32} />
             <h2
-              className={`text-3xl font-bold ${themeClasses.text} bg-gradient-to-r from-blue-600 to-gray-600 bg-clip-text text-transparent`}
+              className={`text-3xl font-bold ${themeClasses.text} bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent`}
             >
               Marketing Studio
             </h2>
@@ -955,7 +954,7 @@ export const MarketingStudio: React.FC = () => {
         </div>
 
         {activeSection === "overview" && renderCampaignOverview()}
-        {/* {activeSection === "scheduler" && renderCampaignScheduler()} */}
+        {activeSection === "scheduler" && renderCampaignScheduler()}
         {activeSection === "calendar" && <PromotionCalendar />}
         {activeSection === "run" && campaignToRun && (
           <CampaignExecution

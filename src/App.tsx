@@ -15,9 +15,6 @@ import Login from './components/Login';
 import { BrandManagerView } from './components/BrandManagerView';
 import { PerformanceAgentView } from './components/PerformanceAgentView';
 import { MarketingStudio } from './components/MarketingStudio';
-import Marketing from './components/MarketingStucio1';
-import { MarketingStudio3 } from './components/MarketingStudio3';
-import { Chatbot } from './components/Chatbot';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -31,7 +28,7 @@ function App() {
       case 'dashboard':
         return <Dashboard onTabChange={setActiveTab} />;
       case 'creator':
-        return <CreatorStudio setActiveTab={setActiveTab}/>;
+        return <CreatorStudio />;
       case 'brandkit':
         return <BrandKit />;
       case 'integrations':
@@ -50,10 +47,6 @@ function App() {
         return <BrandManagerView />;
           case 'marketingstudio':
         return <MarketingStudio />;
-        case 'marketingstudio2':
-        return <Marketing />;
-        case 'marketingstudio3':
-        return <MarketingStudio3 />;
       default:
         return <Dashboard />;
     }
@@ -77,7 +70,6 @@ function App() {
           <main className="flex-1 overflow-auto w-full">
             <div className="w-full">{renderContent()}</div>
           </main>
-          <Chatbot activeTab={activeTab} />
         </div>
       )}
     </ThemeProvider>

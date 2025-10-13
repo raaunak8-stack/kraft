@@ -6,8 +6,6 @@ export const AdminControls: React.FC = () => {
   const { getThemeClasses } = useTheme();
   const themeClasses = getThemeClasses();
   const [activeSection, setActiveSection] = useState('overview');
-  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
-  const [showCampaignDetails, setShowCampaignDetails] = useState(false);
 
   const pendingCampaigns = [
     {
@@ -475,17 +473,11 @@ export const AdminControls: React.FC = () => {
                     
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                      <button
-                        onClick={() => {
-                          setSelectedCampaign(campaign);
-                          setShowCampaignDetails(true);
-                        }}
-                        className={`flex items-center px-4 py-2 ${themeClasses.border} border rounded-lg ${themeClasses.text} ${themeClasses.hover} transition-colors text-sm`}
-                      >
+                      <button className={`flex items-center px-4 py-2 ${themeClasses.border} border rounded-lg ${themeClasses.text} ${themeClasses.hover} transition-colors text-sm`}>
                         <Eye size={16} className="mr-2" />
                         View Details
                       </button>
-
+                      
                       <div className="flex space-x-3">
                         <button className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
                           <ThumbsDown size={16} className="mr-2" />
@@ -1004,197 +996,6 @@ export const AdminControls: React.FC = () => {
           </div>
         )}
       </div>
-
-      {showCampaignDetails && selectedCampaign && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`${themeClasses.cardBg} rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border ${themeClasses.border}`}>
-            <div className={`sticky top-0 ${themeClasses.cardBg} border-b ${themeClasses.border} p-6 flex items-center justify-between z-10`}>
-              <div className="flex items-center">
-                <FileCheck className="text-blue-500 mr-3" size={24} />
-                <div>
-                  <h3 className={`text-xl font-bold ${themeClasses.text}`}>{selectedCampaign.name}</h3>
-                  <p className={`text-sm ${themeClasses.textSecondary}`}>Campaign Approval Review</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setShowCampaignDetails(false);
-                  setSelectedCampaign(null);
-                }}
-                className={`p-2 rounded-lg ${themeClasses.hover} transition-all`}
-              >
-                <svg className={themeClasses.text} width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                  <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                    <Target className="mr-2 text-blue-500" size={18} />
-                    Campaign Information
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Type</span>
-                      <span className={`text-sm font-medium ${themeClasses.text}`}>{selectedCampaign.type}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Status</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        selectedCampaign.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {selectedCampaign.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Priority</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        selectedCampaign.priority === 'high' ? 'bg-red-100 text-red-800' :
-                        selectedCampaign.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {selectedCampaign.priority}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Submitted By</span>
-                      <span className={`text-sm font-medium ${themeClasses.text}`}>{selectedCampaign.submittedBy}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Submitted Date</span>
-                      <span className={`text-sm font-medium ${themeClasses.text}`}>
-                        {new Date(selectedCampaign.submittedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Budget</span>
-                      <span className={`text-sm font-medium text-green-600`}>
-                        ${selectedCampaign.budget.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`text-sm ${themeClasses.textSecondary}`}>Duration</span>
-                      <span className={`text-sm font-medium ${themeClasses.text}`}>{selectedCampaign.duration}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                  <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                    <TrendingUp className="mr-2 text-green-500" size={18} />
-                    Estimated Performance
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-blue-700">Estimated Reach</span>
-                        <Eye className="text-blue-600" size={16} />
-                      </div>
-                      <p className="text-2xl font-bold text-blue-900">{selectedCampaign.estimatedReach}</p>
-                      <p className="text-xs text-blue-600 mt-1">Expected impressions</p>
-                    </div>
-                    <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-green-700">Estimated ROAS</span>
-                        <TrendingUp className="text-green-600" size={16} />
-                      </div>
-                      <p className="text-2xl font-bold text-green-900">{selectedCampaign.estimatedROAS}</p>
-                      <p className="text-xs text-green-600 mt-1">Return on ad spend</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                  <MessageSquare className="mr-2 text-blue-500" size={18} />
-                  Campaign Description
-                </h4>
-                <p className={`${themeClasses.text} leading-relaxed`}>{selectedCampaign.description}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                  <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                    <CheckCircle className="mr-2 text-green-500" size={18} />
-                    Campaign Objectives
-                  </h4>
-                  <div className="space-y-2">
-                    {selectedCampaign.objectives.map((objective: string, index: number) => (
-                      <div key={index} className="flex items-center space-x-2 p-3 bg-green-50 rounded-lg">
-                        <CheckCircle className="text-green-500" size={16} />
-                        <span className={`text-sm ${themeClasses.text}`}>{objective}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                  <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                    <Users className="mr-2 text-green-500" size={18} />
-                    Target Audience
-                  </h4>
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className={`text-sm ${themeClasses.text}`}>{selectedCampaign.targetAudience}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                  <Activity className="mr-2 text-blue-500" size={18} />
-                  Platforms & Channels
-                </h4>
-                <div className="flex flex-wrap gap-3">
-                  {selectedCampaign.platforms.map((platform: string, index: number) => (
-                    <div key={index} className="flex items-center px-4 py-2 bg-blue-100 rounded-lg">
-                      <span className="text-sm font-medium text-blue-800">{platform}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`${themeClasses.cardBg} border ${themeClasses.border} rounded-xl p-6`}>
-                <h4 className={`font-semibold ${themeClasses.text} mb-4 flex items-center`}>
-                  <MessageSquare className="mr-2 text-green-500" size={18} />
-                  Approval Comments
-                </h4>
-                <textarea
-                  placeholder="Add your approval or rejection comments here..."
-                  className={`w-full p-4 ${themeClasses.cardBg} ${themeClasses.border} border rounded-xl ${themeClasses.text} focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]`}
-                ></textarea>
-              </div>
-
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => {
-                    setShowCampaignDetails(false);
-                    setSelectedCampaign(null);
-                  }}
-                  className={`px-6 py-2 ${themeClasses.cardBg} ${themeClasses.border} border rounded-xl ${themeClasses.text} hover:bg-gray-100 transition-all`}
-                >
-                  Close
-                </button>
-                <div className="flex space-x-3">
-                  <button className="flex items-center px-6 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all">
-                    <ThumbsDown size={16} className="mr-2" />
-                    Reject Campaign
-                  </button>
-                  <button className="flex items-center px-6 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all">
-                    <ThumbsUp size={16} className="mr-2" />
-                    Approve Campaign
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <style jsx>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(20px); }
